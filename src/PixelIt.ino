@@ -1,18 +1,6 @@
-#if defined(ESP8266)
-#pragma message ("ESP8266 stuff happening!")
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WiFi.h>
-
-#elif defined(ESP32)
-#pragma message ("ESP32 stuff happening!")
-#include <WebServer.h>
-#include <HTTPUpdateServer.h>
-#include <WiFi.h>
-#else
-#error "This ain't a ESP8266 or ESP32, dumbo!"
-#endif
-
 
 #include <WebSocketsServer.h>    // https://github.com/Links2004/arduinoWebSockets
 #include <WiFiClient.h>
@@ -27,7 +15,6 @@
 #include <FastLED_NeoMatrix.h> // https://github.com/o0shojo0o/FastLED_NeoMatrix and https://github.com/o0shojo0o/Framebuffer_GFX
 #include <LightDependentResistor.h> // https://github.com/o0shojo0o/Arduino-Light-Dependent-Resistor-Library v1.0.0!!!
 #include <DHTesp.h>
-#include <DFPlayerMini_Fast.h>
 #include <SoftwareSerial.h>
 #include "ColorConverterLib.h"
 
@@ -61,12 +48,7 @@ int mqttMaxRetrys = 3;
 #define LDR_PIN A0
 #define LDR_PHOTOCELL LightDependentResistor::GL5516
 
-//// Matrix Config
-#if defined (ESP8266)
-	#define MATRIX_PIN D2
-#elif defined (ESP32)
-	#define MATRIX_PIN 27
-#endif
+#define MATRIX_PIN D2
 
 
 #define NUMMATRIX (32 * 8)
@@ -99,13 +81,8 @@ WiFiClient espClient;
 WiFiUDP udp;
 PubSubClient client(espClient);
 WiFiManager wifiManager;
-#if defined (ESP8266)
-	ESP8266WebServer server(80);
-	ESP8266HTTPUpdateServer httpUpdater;
-#elif defined (ESP32)
-	WebServer server(80);
-	HTTPUpdateServer httpUpdater;
-#endif
+ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 LightDependentResistor photocell(LDR_PIN, LDR_RESISTOR, LDR_PHOTOCELL, 10);
@@ -694,7 +671,7 @@ void CreateFrames(JsonObject& json)
 		logMessage += F("Brightness Control, ");
 		matrixtBrightness = json["brightness"];
 	}
-	
+
 	// SleepMode
 	if (json.containsKey("sleepMode"))
 	{
@@ -1004,7 +981,7 @@ String GetMatrixInfo()
 	JsonObject& root = jsonBuffer.createObject();
 	
 	root["pixelitVersion"] = version;
-	//root["sketchSize"] = ESP.getSketchSize();   Vorrüber gehend ausgeblockt, da bei ESP32 ein lag verursacht wird
+	root["sketchSize"] = ESP.getSketchSize();
 	root["freeSketchSpace"] = ESP.getFreeSketchSpace();
 	root["wifiRSSI"] = String(WiFi.RSSI());
 	root["wifiQuality"] = GetRSSIasQuality(WiFi.RSSI());
@@ -1012,12 +989,7 @@ String GetMatrixInfo()
 	root["ipAddress"] = WiFi.localIP().toString();
 	root["freeHeap"] = ESP.getFreeHeap();
 	
-	#if defined(ESP8266)
-		root["chipID"] = ESP.getChipId();
-	#elif defined(ESP32)
-		root["chipID"] = uint64ToString(ESP.getEfuseMac());
-	#endif
-
+	root["chipID"] = ESP.getChipId();
 	root["cpuFreqMHz"] = ESP.getCpuFreqMHz();
 	root["sleepMode"] = sleepMode;
 	
