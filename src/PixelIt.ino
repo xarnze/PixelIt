@@ -57,7 +57,7 @@ int mqttMaxRetrys = 3;
 
 
 //// LDR Config
-#define LDR_RESISTOR 10000 //ohms
+#define LDR_RESISTOR 1000 //ohms
 #define LDR_PIN A0
 #define LDR_PHOTOCELL LightDependentResistor::GL5516
 
@@ -108,13 +108,17 @@ WiFiManager wifiManager;
 #endif
 
 WebSocketsServer webSocket = WebSocketsServer(81);
-LightDependentResistor photocell(LDR_PIN, LDR_RESISTOR, LDR_PHOTOCELL);
+LightDependentResistor photocell(LDR_PIN, LDR_RESISTOR, LDR_PHOTOCELL, 10);
 DHTesp dht;
 DFPlayerMini_Fast mp3Player;
 SoftwareSerial softSerial(D7, D8); // RX | TX
 
 // Matrix Vars
 int matrixtBrightness = 127;
+bool matrixtBrightnessAuto = true;
+int matrixBrightnessMin = 20;
+int matrixBrightnessMax = 100;
+uint matrixBrightnessAutoPrevMillis = 0;
 int matrixType = 1;
 String matrixTempCorrection = "default";
 
@@ -1857,7 +1861,7 @@ void setup()
 	}
 
 	// Init LightSensor
-	photocell.setPhotocellPositionOnGround(false);
+	photocell.setPhotocellPositionOnGround(true);
 	ColorTemperature userColorTemp = GetUserColorTemp();;
 	LEDColorCorrection userLEDCorrection = GetUserColorCorrection();
 
@@ -1996,6 +2000,16 @@ void loop()
 	{
 		sendLuxPrevMillis = millis();
 		SendLDR(false);
+	}
+
+	if (millis() - matrixBrightnessAutoPrevMillis >= 1000 && matrixtBrightnessAuto)
+	{
+		matrixBrightnessAutoPrevMillis = millis();
+		float luxSensor = roundf(photocell.getCurrentLux() * 1000) / 1000;
+		float newBrightnes = map(luxSensor, 0, 4000, matrixBrightnessMin, matrixBrightnessMax);
+		Log("Auto Brightnes", "Lux: " + (String)luxSensor + "    NewBright: " + (String)newBrightnes);
+		matrixtBrightness = newBrightnes;
+		matrix->setBrightness(newBrightnes);
 	}
 
 	if (millis() - sendDHTPrevMillis >= 3000)
