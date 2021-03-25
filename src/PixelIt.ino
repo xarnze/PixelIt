@@ -451,29 +451,6 @@ void SetConfig(JsonObject& json)
 	SaveConfig();
 }
 
-//void SetOTAUpdate()
-//{
-//	mqttAktiv = false;
-//
-//	t_httpUpdate_return ret = ESPhttpUpdate.update(espClient, F("http://www.bastelbunker.de/pixelit/PixelIt.bin"));
-//	// Or:
-//	//t_httpUpdate_return ret = ESPhttpUpdate.update(client, "server", 80, "file.bin");
-//
-//	switch (ret) {
-//	case HTTP_UPDATE_FAILED:
-//		Log(F("SetUpdate"), "HTTP_UPDATE_FAILD Error (" + String(ESPhttpUpdate.getLastError()) + "): " + ESPhttpUpdate.getLastErrorString());
-//		break;
-//
-//	case HTTP_UPDATE_NO_UPDATES:
-//		Log(F("SetUpdate"), F("HTTP_UPDATE_NO_UPDATES"));
-//		break;
-//
-//	case HTTP_UPDATE_OK:
-//		Log(F("SetUpdate"), F("HTTP_UPDATE_OK"));
-//		break;
-//	}
-//}
-
 void WifiSetup()
 {
 	wifiManager.resetSettings();
@@ -586,14 +563,6 @@ void HandleGetMatrixInfo()
 	server.sendHeader("Connection", "close");
 	server.send(200, "application/json", GetMatrixInfo());
 }
-
-/*
-void HandleGetSoundInfo()
-{
-	server.sendHeader("Connection", "close");
-	server.send(200, "application/json", GetMp3PlayerInfo());
-}
-*/
 
 void Handle_factoryreset()
 {	
@@ -1071,23 +1040,6 @@ String GetLuxSensor()
 
 	return json;
 }
-
-/*
-String GetMp3PlayerInfo()
-{
-	DynamicJsonBuffer jsonBuffer;
-	JsonObject& root = jsonBuffer.createObject();
-
-	root["playing"] = mp3Player.isPlaying();
-	root["currentSdTrack"] = mp3Player.currentSdTrack();
-	root["volume"] = mp3Player.currentVolume();
-
-	String json;
-	root.printTo(json);
-
-	return json;
-}
-*/
 
 String GetMatrixInfo()
 {
@@ -1738,55 +1690,6 @@ int* GetUserCutomCorrection()
 	return rgbArray;
 }
 
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-// Audio
-/*
-void DeserializeSound(JsonObject& soundJson)
-{
-	for (int i = 0; i < 64; i++)
-	{
-		melodyNotes[i] = 0;
-	}
-
-	int counter = 0;
-	for (JsonVariant x : soundJson["sound"].asArray())
-	{
-		melodyNotes[counter] = GetSound(x["note"].asString());
-		melodyDuration[counter] = x["duration"];
-		melodyPause[counter] = x["pause"];
-		counter++;
-	}
-	currentNote = 0;
-	mustPlaySound = true;
-}
-
-void PlaySound()
-{
-	if (mustPlaySound)
-	{
-		if (melodyNotes[currentNote] > 0)
-		{
-			unsigned long currentMillis = millis();
-
-			if (currentNote == 0 || currentMillis - melodyPreviousMillis >= melodyTotalPause)
-			{
-				melodyTotalPause = melodyDuration[currentNote] + melodyPause[currentNote];
-				melodyPreviousMillis = currentMillis;
-				tone(soundPin, melodyNotes[currentNote], melodyDuration[currentNote]);
-				currentNote++;
-			}
-		}
-		else
-		{
-			mustPlaySound = false;
-		}
-	}
-}
-*/
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
 void ClearTextArea()
 {
 	int16_t h = 8;
@@ -2147,42 +2050,6 @@ void SendDHT(bool force)
 
 	OldGetDHTSensor = dhtSensor;
 }
-
-/*
-void SendMp3PlayerInfo(bool force)
-{
-	if (force)
-	{
-		OldGetMP3PlayerInfo = "";
-	}
-
-	String mP3PlayerInfo;
-
-	// Prüfen ob die Abfrage des LuxSensor überhaupt erforderlich ist
-	if ((mqttAktiv == true && mqttRetryCounter < mqttMaxRetrys) || (webSocket.connectedClients() > 0))
-	{
-		mP3PlayerInfo = GetMp3PlayerInfo();
-	}
-	// Prüfen ob über MQTT versendet werden muss
-	if (mqttAktiv == true && mqttRetryCounter < mqttMaxRetrys && OldGetMP3PlayerInfo != mP3PlayerInfo)
-	{
-		client.publish((mqttMasterTopic + "soundinfo").c_str(), mP3PlayerInfo.c_str(), true);
-	}
-	// Prüfen ob über Websocket versendet werden muss
-	if (webSocket.connectedClients() > 0 && OldGetMP3PlayerInfo != mP3PlayerInfo)
-	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
-		{
-			if (websocketConnection[i] == "/dash" || websocketConnection[i] == "/soundinfo")
-			{
-				webSocket.sendTXT(i, mP3PlayerInfo);
-			}
-		}
-	}
-
-	OldGetMP3PlayerInfo = mP3PlayerInfo;
-}
-*/
 
 void SendConfig()
 {
