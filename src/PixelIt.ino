@@ -110,7 +110,6 @@ WiFiManager wifiManager;
 WebSocketsServer webSocket = WebSocketsServer(81);
 LightDependentResistor photocell(LDR_PIN, LDR_RESISTOR, LDR_PHOTOCELL, 10);
 DHTesp dht;
-DFPlayerMini_Fast mp3Player;
 SoftwareSerial softSerial(D7, D8); // RX | TX
 
 // Matrix Vars
@@ -179,9 +178,6 @@ uint sendInfoPrevMillis = 0;
 String OldGetMatrixInfo;
 String OldGetLuxSensor;
 String OldGetDHTSensor;
-
-// MP3Player Vars
-String OldGetMP3PlayerInfo;
 
 // Websoket Vars
 String websocketConnection[10];
@@ -698,46 +694,7 @@ void CreateFrames(JsonObject& json)
 		logMessage += F("Brightness Control, ");
 		matrixtBrightness = json["brightness"];
 	}
-
-	// Sound
-	if (json.containsKey("sound"))
-	{
-		logMessage += F("Sound, ");
-		// Volume
-		if (json["sound"]["volume"] != NULL && json["sound"]["volume"].is<int>())
-		{
-			mp3Player.volume(json["sound"]["volume"].as<int>());
-		}
-		// Play
-		if (json["sound"]["control"] == "play")
-		{
-			if (json["sound"]["folder"])
-			{
-				mp3Player.playFolder(json["sound"]["folder"].as<int>(), json["sound"]["file"].as<int>());
-			}
-			else
-			{
-				mp3Player.play(json["sound"]["file"].as<int>());
-			}
-		}
-		// Stop
-		else if (json["sound"]["control"] == "pause")
-		{
-			mp3Player.pause();
-		}
-		// Play Next
-		else if (json["sound"]["control"] == "next")
-		{
-			mp3Player.playNext();
-		}
-		// Play Previous 
-		else if (json["sound"]["control"] == "previous")
-		{
-			mp3Player.playPrevious();
-		}
-	}
-
-
+	
 	// SleepMode
 	if (json.containsKey("sleepMode"))
 	{
@@ -1865,9 +1822,6 @@ void setup()
 	softSerial.begin(9600);
 	Log(F("Setup"), F("Software Serial started"));
 
-	mp3Player.begin(softSerial);
-	Log(F("Setup"), F("DFPlayer started"));
-
 }
 
 void loop()
@@ -1930,7 +1884,6 @@ void loop()
 	{
 		sendInfoPrevMillis = millis();
 		SendMatrixInfo(false);
-		//SendMp3PlayerInfo(false);
 	}
 
 
@@ -1945,8 +1898,6 @@ void loop()
 		scrollTextPrevMillis = millis();
 		ScrollText(false);
 	}
-
-	//PlaySound();	
 }
 
 void SendMatrixInfo(bool force)
