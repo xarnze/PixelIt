@@ -16,7 +16,6 @@
 #include <FastLED_NeoMatrix.h> // https://github.com/o0shojo0o/FastLED_NeoMatrix and https://github.com/o0shojo0o/Framebuffer_GFX
 #include <LightDependentResistor.h> // https://github.com/o0shojo0o/Arduino-Light-Dependent-Resistor-Library v1.0.0!!!
 #include <DHTesp.h>
-#include <SoftwareSerial.h>
 #include "ColorConverterLib.h"
 #include <Wire.h>
 
@@ -29,8 +28,6 @@
 #define DEBUG 0
 void FadeOut(int = 10, int = 0);
 void FadeIn(int = 10, int = 0);
-
-
 
 //// MQTT Config
 bool mqttAktiv = false;
@@ -160,6 +157,12 @@ void SaveConfigCallback()
 {
 	shouldSaveConfig = true;
 }
+
+void EnteredHotspotCallback(WiFiManager* manager)
+{
+	DrawTextHelper("HOTSPOT", false, false, false, false, false, false, NULL, 255, 255, 255, 3, 1);
+}
+
 
 void SaveConfig()
 {
@@ -1727,6 +1730,7 @@ void setup()
 
 	// Set config save notify callback
 	wifiManager.setSaveConfigCallback(SaveConfigCallback);
+	wifiManager.setAPCallback(EnteredHotspotCallback);
 	wifiManager.setMinimumSignalQuality();
 	// Config menue timeout 180 seconds. 
 	wifiManager.setConfigPortalTimeout(180);

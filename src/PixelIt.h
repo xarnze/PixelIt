@@ -111,3 +111,5 @@ time_t getNtpTime();
 void sendNTPpacket(IPAddress& address);
 
 void Log(String function, String message);
+
+void EnteredHotspotCallback(WiFiManager* manager);
