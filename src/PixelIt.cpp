@@ -1,13 +1,14 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WiFi.h>
+#include <Arduino.h>
 
 #include <WebSocketsServer.h>    // https://github.com/Links2004/arduinoWebSockets
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h>
 #include <PubSubClient.h> // Attention in the lib the #define MQTT_MAX_PACKET_SIZE must be increased to 4000!
-#include <FS.h>
+#include <LittleFS.h>
 #include <TimeLib.h> // https://github.com/o0shojo0o/Time
 #include <ArduinoJson.h> // V5.13.5!!!
 #include <Adafruit_GFX.h>
@@ -17,14 +18,13 @@
 #include <DHTesp.h>
 #include <SoftwareSerial.h>
 #include "ColorConverterLib.h"
+#include <Wire.h>
 
 // PixelIT Stuff 
 #include "PixelItFont.h"
 #include "Webinterface.h"
 #include "Tools.h"
-#include <Wire.h>
-
-
+#include "PixelIt.h"
 
 #define DEBUG 0
 void FadeOut(int = 10, int = 0);
@@ -70,9 +70,6 @@ CRGB leds[NUMMATRIX];
 								: __DATE__ [2] == 'v' ? 10 : 11) +1)
 #define COMPILE_DAY           ((__DATE__ [4]==' ' ? 0 : __DATE__  [4]-'0')*10+(__DATE__[5]-'0'))
 
-
-
-
 const String version = String(COMPILE_SHORTYEAR) + IntFormat(COMPILE_MONTH) + IntFormat(COMPILE_DAY) + IntFormat(COMPILE_HOUR) + IntFormat(COMPILE_MINUTE);
 
 
@@ -87,7 +84,6 @@ ESP8266HTTPUpdateServer httpUpdater;
 WebSocketsServer webSocket = WebSocketsServer(81);
 LightDependentResistor photocell(LDR_PIN, LDR_RESISTOR, LDR_PHOTOCELL, 10);
 DHTesp dht;
-SoftwareSerial softSerial(D7, D8); // RX | TX
 
 // Matrix Vars
 int matrixtBrightness = 127;
@@ -194,7 +190,7 @@ void SaveConfig()
 		json["mqttMasterTopic"] = mqttMasterTopic;
 		json["mqttPort"] = mqttPort;
 
-		File configFile = SPIFFS.open("/config.json", "w");
+		File configFile = LittleFS.open("/config.json", "w");
 		json.printTo(configFile);
 		configFile.close();
 		Log("SaveConfig", "Saved");
@@ -204,10 +200,10 @@ void SaveConfig()
 
 void LoadConfig()
 {
-	if (SPIFFS.exists("/config.json"))
+	if (LittleFS.exists("/config.json"))
 	{
 		//file exists, reading and loading
-		File configFile = SPIFFS.open("/config.json", "r");
+		File configFile = LittleFS.open("/config.json", "r");
 
 		if (configFile)
 		{
@@ -539,7 +535,7 @@ void HandleGetMatrixInfo()
 
 void Handle_factoryreset()
 {	
-	File configFile = SPIFFS.open("/config.json", "w");
+	File configFile = LittleFS.open("/config.json", "w");
 	if (!configFile)
 	{
 		Log("Handle_factoryreset", "Failed to open config file for reset");
@@ -918,7 +914,7 @@ void CreateFrames(JsonObject& json)
 
 String GetConfig()
 {
-	File configFile = SPIFFS.open("/config.json", "r");
+	File configFile = LittleFS.open("/config.json", "r");
 
 	if (configFile)
 	{
@@ -1671,7 +1667,7 @@ void setup()
 
 	// Mounting FileSystem
 	Serial.println(F("Mounting file system..."));
-	if (SPIFFS.begin())
+	if (LittleFS.begin())
 	{
 		Serial.println(F("Mounted file system."));
 		LoadConfig();
@@ -1790,9 +1786,6 @@ void setup()
 
 	dht.setup(D1, DHTesp::DHT22);
 	Log(F("Setup"), F("DHT started"));
-
-	softSerial.begin(9600);
-	Log(F("Setup"), F("Software Serial started"));
 
 }
 
