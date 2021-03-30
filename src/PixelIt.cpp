@@ -24,6 +24,7 @@
 #include "Webinterface.h"
 #include "Tools.h"
 #include "PixelIt.h"
+#include "ButtonHandler.h"
 
 #define DEBUG 0
 void FadeOut(int = 10, int = 0);
@@ -47,6 +48,13 @@ int mqttMaxRetrys = 3;
 
 #define MATRIX_PIN D2
 
+#define LEFT_BTN D1
+#define MIDDLE_BTN D5
+#define RIGHT_BTN D6
+#define SHORT_CLICK_EVENT_INTERVAL 150
+#define DOUBLE_CLICK_EVENT_INTERVAL 300
+#define LONG_CLICK_EVENT_INTERVAL 500
+#define RATTLE_VALUE 200
 
 #define NUMMATRIX (32 * 8)
 CRGB leds[NUMMATRIX];
@@ -69,6 +77,27 @@ CRGB leds[NUMMATRIX];
 
 const String version = String(COMPILE_SHORTYEAR) + IntFormat(COMPILE_MONTH) + IntFormat(COMPILE_DAY) + IntFormat(COMPILE_HOUR) + IntFormat(COMPILE_MINUTE);
 
+ButtonHandler leftbtn_handler(
+  LEFT_BTN,
+  SHORT_CLICK_EVENT_INTERVAL,
+  DOUBLE_CLICK_EVENT_INTERVAL,
+  LONG_CLICK_EVENT_INTERVAL,
+  RATTLE_VALUE
+);
+ButtonHandler middlebtn_handler(
+  MIDDLE_BTN,
+  SHORT_CLICK_EVENT_INTERVAL,
+  DOUBLE_CLICK_EVENT_INTERVAL,
+  LONG_CLICK_EVENT_INTERVAL,
+  RATTLE_VALUE
+);
+ButtonHandler rightbtn_handler(
+  RIGHT_BTN,
+  SHORT_CLICK_EVENT_INTERVAL,
+  DOUBLE_CLICK_EVENT_INTERVAL,
+  LONG_CLICK_EVENT_INTERVAL,
+  RATTLE_VALUE
+);
 
 FastLED_NeoMatrix* matrix;
 WiFiClient espClient;
@@ -1795,6 +1824,48 @@ void setup()
 
 void loop()
 {
+	// Call this function in loop to make ButtonHandler class process button events.
+	leftbtn_handler.processEvents();
+	// Example of handling events from button.
+	switch (leftbtn_handler.getEvent()) {
+		case ButtonHandler::EVENT_SHORT_CLICK:
+			Serial.println("short");
+		break;
+		case ButtonHandler::EVENT_DOUBLE_CLICK:
+			Serial.println("double");
+		break;
+		case ButtonHandler::EVENT_LONG_CLICK:
+			Serial.println("long");
+		break;
+	}
+
+	middlebtn_handler.processEvents();
+	// Example of handling events from button.
+	switch (middlebtn_handler.getEvent()) {
+		case ButtonHandler::EVENT_SHORT_CLICK:
+			Serial.println("short");
+		break;
+		case ButtonHandler::EVENT_DOUBLE_CLICK:
+			Serial.println("double");
+		break;
+		case ButtonHandler::EVENT_LONG_CLICK:
+			Serial.println("long");
+		break;
+	}
+
+	rightbtn_handler.processEvents();
+	// Example of handling events from button.
+	switch (rightbtn_handler.getEvent()) {
+		case ButtonHandler::EVENT_SHORT_CLICK:
+			Serial.println("short");
+		break;
+		case ButtonHandler::EVENT_DOUBLE_CLICK:
+			Serial.println("double");
+		break;
+		case ButtonHandler::EVENT_LONG_CLICK:
+			Serial.println("long");
+		break;
+	}
 
 	server.handleClient();
 	webSocket.loop();
