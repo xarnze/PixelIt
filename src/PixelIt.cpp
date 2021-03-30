@@ -1849,7 +1849,9 @@ void loop()
 	// Example of handling events from button.
 	switch (middlebtn_handler.getEvent()) {
 		case ButtonHandler::EVENT_SHORT_CLICK:
-			Serial.println("short");
+			scrollTextAktivLoop = false;
+			animateBMPAktivLoop = false;
+			clockAktiv = true;
 		break;
 		case ButtonHandler::EVENT_DOUBLE_CLICK:
 			Serial.println("double");
