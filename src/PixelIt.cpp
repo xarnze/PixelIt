@@ -200,6 +200,7 @@ void SaveConfig()
 		DynamicJsonBuffer jsonBuffer;
 		JsonObject& json = jsonBuffer.createObject();
 
+		json["matrixtBrightnessAuto"] = matrixtBrightnessAuto;
 		json["matrixtBrightness"] = matrixtBrightness;
 		json["matrixType"] = matrixType;
 		json["matrixTempCorrection"] = matrixTempCorrection;
@@ -246,6 +247,11 @@ void LoadConfig()
 
 			if (json.success())
 			{
+				if (json.containsKey("matrixtBrightnessAuto"))
+				{
+					matrixtBrightnessAuto = json["matrixtBrightnessAuto"];
+				}
+
 				if (json.containsKey("matrixtBrightness"))
 				{
 					matrixtBrightness = json["matrixtBrightness"];
