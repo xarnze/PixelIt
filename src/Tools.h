@@ -25,7 +25,7 @@ int DSToffset(time_t _date, int _clockTimeZone)
 	else if (month(_date) > 3 && month(_date) < 10) {
 		_summerTime = true; // Summertime in Apr, May, Jun, Jul, Aug, Sep
 	}
-	else if ((month(_date) == 3 && (hour(_date) + 24 * day(_date)) >= (1 + String(_clockTimeZone).toInt() + 24 * (31 - (5 * year(_date) / 4 + 4) % 7))) || month(_date) == 10 && (hour(_date) + 24 * day(_date)) < (1 + String(_clockTimeZone).toInt() + 24 * (31 - (5 * year(_date) / 4 + 1) % 7)))
+	else if ((month(_date) == 3 && (hour(_date) + 24 * day(_date)) >= (1 + String(_clockTimeZone).toInt() + 24 * (31 - (5 * year(_date) / 4 + 4) % 7))) || (month(_date) == 10 && (hour(_date) + 24 * day(_date))) < (1 + String(_clockTimeZone).toInt() + 24 * (31 - (5 * year(_date) / 4 + 1) % 7)))
 	{
 		_summerTime = true;
 	}

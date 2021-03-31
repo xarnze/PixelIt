@@ -150,7 +150,7 @@ uint16_t  clockColorR = 255, clockColorG = 255, clockColorB = 255;
 bool scrollTextAktivLoop = false;
 uint scrollTextPrevMillis = 0;
 int scrollTextDefaultDelay = 100;
-int scrollTextDelay;
+uint scrollTextDelay;
 int scrollPos;
 int scrollposY;
 bool scrollwithBMP;
@@ -164,7 +164,7 @@ uint animateBMPPrevMillis = 0;
 int animateBMPCounter = 0;
 bool animateBMPReverse = false;
 bool animateBMPRubberbandingAktiv = false;
-int animateBMPDelay;
+uint animateBMPDelay;
 int animateBMPLimitLoops = -1;
 int animateBMPLoopCount = 0;
 int animateBMPLimitFrames = -1;
@@ -264,12 +264,12 @@ void LoadConfig()
 
 				if (json.containsKey("matrixTempCorrection"))
 				{
-					matrixTempCorrection = json["matrixTempCorrection"].asString();
+					matrixTempCorrection = json["matrixTempCorrection"].as<char*>();
 				}
 
 				if (json.containsKey("ntpServer"))
 				{
-					ntpServer = json["ntpServer"].asString();
+					ntpServer = json["ntpServer"].as<char*>();
 				}
 
 				if (json.containsKey("clockTimeZone"))
@@ -325,22 +325,22 @@ void LoadConfig()
 
 				if (json.containsKey("mqttUser"))
 				{
-					mqttUser = json["mqttUser"].asString();
+					mqttUser = json["mqttUser"].as<char*>();
 				}
 
 				if (json.containsKey("mqttPassword"))
 				{
-					mqttPassword = json["mqttPassword"].asString();
+					mqttPassword = json["mqttPassword"].as<char*>();
 				}
 
 				if (json.containsKey("mqttServer"))
 				{
-					mqttServer = json["mqttServer"].asString();
+					mqttServer = json["mqttServer"].as<char*>();
 				}
 
 				if (json.containsKey("mqttMasterTopic"))
 				{
-					mqttMasterTopic = json["mqttMasterTopic"].asString();
+					mqttMasterTopic = json["mqttMasterTopic"].as<char*>();
 				}
 
 				if (json.containsKey("mqttPort"))
@@ -363,6 +363,11 @@ void LoadConfig()
 
 void SetConfig(JsonObject& json)
 {
+	if (json.containsKey("matrixtBrightnessAuto"))
+	{
+		matrixtBrightnessAuto = json["matrixtBrightnessAuto"];
+	}
+
 	if (json.containsKey("matrixtBrightness"))
 	{
 		matrixtBrightness = json["matrixtBrightness"];
@@ -376,12 +381,12 @@ void SetConfig(JsonObject& json)
 
 	if (json.containsKey("matrixTempCorrection"))
 	{
-		matrixTempCorrection = json["matrixTempCorrection"].asString();
+		matrixTempCorrection = json["matrixTempCorrection"].as<char*>();
 	}
 
 	if (json.containsKey("ntpServer"))
 	{
-		ntpServer = json["ntpServer"].asString();
+		ntpServer = json["ntpServer"].as<char*>();
 	}
 
 	if (json.containsKey("clockTimeZone"))
@@ -431,22 +436,22 @@ void SetConfig(JsonObject& json)
 
 	if (json.containsKey("mqttUser"))
 	{
-		mqttUser = json["mqttUser"].asString();
+		mqttUser = json["mqttUser"].as<char*>();
 	}
 
 	if (json.containsKey("mqttPassword"))
 	{
-		mqttPassword = json["mqttPassword"].asString();
+		mqttPassword = json["mqttPassword"].as<char*>();
 	}
 
 	if (json.containsKey("mqttServer"))
 	{
-		mqttServer = json["mqttServer"].asString();
+		mqttServer = json["mqttServer"].as<char*>();
 	}
 
 	if (json.containsKey("mqttMasterTopic"))
 	{
-		mqttMasterTopic = json["mqttMasterTopic"].asString();
+		mqttMasterTopic = json["mqttMasterTopic"].as<char*>();
 	}
 
 	if (json.containsKey("mqttPort"))
@@ -783,7 +788,7 @@ void CreateFrames(JsonObject& json)
 
 				clockWithSeconds = json["clock"]["withSeconds"];
 
-				if (json["clock"]["color"]["r"].asString() != NULL)
+				if (json["clock"]["color"]["r"].as<char*>() != NULL)
 				{
 					clockColorR = json["clock"]["color"]["r"];
 					clockColorG = json["clock"]["color"]["g"];
@@ -817,7 +822,7 @@ void CreateFrames(JsonObject& json)
 		if (json.containsKey("bars"))
 		{
 			logMessage += F("Bars, ");
-			for (JsonVariant x : json["bars"].asArray())
+			for (JsonVariant x : json["bars"].as<JsonArray>())
 			{
 				matrix->drawLine(x["position"]["x"], x["position"]["y"], x["position"]["x2"], x["position"]["y2"], matrix->Color(x["color"]["r"], x["color"]["g"], x["color"]["b"]));
 			}
@@ -844,7 +849,7 @@ void CreateFrames(JsonObject& json)
 
 			// JsonArray in IntArray konvertieren
 			// dies ist nötik für diverse kleine Logiken z.B. Scrolltext
-			json["bitmap"]["data"].asArray().copyTo(bmpArray);
+			json["bitmap"]["data"].as<JsonArray>().copyTo(bmpArray);
 		}
 
 		// Ist eine BitmapAnimation übergeben worden?
@@ -858,10 +863,10 @@ void CreateFrames(JsonObject& json)
 			}
 
 			int counter = 0;
-			for (JsonVariant x : json["bitmapAnimation"]["data"].asArray())
+			for (JsonVariant x : json["bitmapAnimation"]["data"].as<JsonArray>())
 			{
 				// JsonArray in IntArray konvertieren
-				x.asArray().copyTo(bmpArray);
+				x.as<JsonArray>().copyTo(bmpArray);
 				// Speichern für die Ausgabe
 				for (int i = 0; i < 64; i++)
 				{
@@ -898,7 +903,7 @@ void CreateFrames(JsonObject& json)
 			scrollTextDelay = scrollTextDefaultDelay;
 
 			// Ist ScrollText auto oder true gewählt?
-			scrollTextAktiv = ((json["text"]["scrollText"] == "auto" || (json["text"]["scrollText"]).is<bool>() && json["text"]["scrollText"]));
+			scrollTextAktiv = ((json["text"]["scrollText"] == "auto" || ((json["text"]["scrollText"]).is<bool>() && json["text"]["scrollText"])));
 
 			if (json["text"]["centerText"])
 			{
@@ -969,6 +974,8 @@ String GetConfig()
 		root.printTo(json);
 
 		return json;
+	} else {
+		return "{}";
 	}
 }
 
@@ -1057,9 +1064,7 @@ void DrawAutoTextScrolled(String text, bool bigFont, bool withBMP, bool fadeInRe
 
 void DrawTextHelper(String text, bool bigFont, bool centerText, bool scrollText, bool autoScrollText, bool withBMP, bool fadeInRequired, uint16_t bmpArray[64], int colorRed, int colorGreen, int colorBlue, int posX, int posY)
 {
-	int charSize = 0;
-	int16_t x1, y1;
-	uint16_t xPixelText, h, xPixel;
+	uint16_t xPixelText, xPixel;
 
 	text = Utf8ToAscii(text);
 
@@ -1641,7 +1646,7 @@ int* GetUserCutomCorrection()
 	rgbString.trim();
 
 	// R,G,B / 255,255,255
-	int rgbArray[3];
+	static int rgbArray[3];
 
 	//R
 	rgbArray[0] = rgbString.substring(0, 3).toInt();
@@ -1970,7 +1975,7 @@ void SendMatrixInfo(bool force)
 	// Prüfen ob über Websocket versendet werden muss
 	if (webSocket.connectedClients() > 0 && OldGetMatrixInfo != matrixInfo)
 	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
+		for (uint i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
 		{
 			if (websocketConnection[i] == "/dash" || websocketConnection[i] == "/matrixinfo")
 			{
@@ -2004,7 +2009,7 @@ void SendLDR(bool force)
 	// Prüfen ob über Websocket versendet werden muss
 	if (webSocket.connectedClients() > 0 && OldGetLuxSensor != luxSensor)
 	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
+		for (uint i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
 		{
 			if (websocketConnection[i] == "/dash" || websocketConnection[i] == "/lux")
 			{
@@ -2038,7 +2043,7 @@ void SendDHT(bool force)
 	// Prüfen ob über Websocket versendet werden muss
 	if (webSocket.connectedClients() > 0 && OldGetDHTSensor != dhtSensor)
 	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
+		for (uint i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
 		{
 			if (websocketConnection[i] == "/dash" || websocketConnection[i] == "/dht")
 			{
@@ -2054,7 +2059,7 @@ void SendConfig()
 {
 	if (webSocket.connectedClients() > 0)
 	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
+		for (uint i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
 		{
 			if (websocketConnection[i] == "/config")
 			{
@@ -2128,7 +2133,7 @@ void Log(String function, String message)
 	// Prüfen ob über Websocket versendet werden muss
 	if (webSocket.connectedClients() > 0)
 	{
-		for (int i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
+		for (uint i = 0; i < sizeof websocketConnection / sizeof websocketConnection[0]; i++)
 		{
 			if (websocketConnection[i] == "/dash")
 			{
